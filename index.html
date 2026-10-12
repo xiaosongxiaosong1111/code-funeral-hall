@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta
+      name="description"
+      content="代码守灵堂：用 Kiro Hook 记录代码删除，并由回归测试裁定它已经安息，还是再次诈尸。"
+    >
+    <title>代码守灵堂 · Code Funeral Hall</title>
+    <link rel="stylesheet" href="./styles.css">
+    <script src="./app.js" type="module"></script>
+  </head>
+  <body data-state="pending">
+    <a class="skip-link" href="#main-content">跳到主要内容</a>
+
+    <div class="ambient" aria-hidden="true">
+      <span class="ambient__orb ambient__orb--one"></span>
+      <span class="ambient__orb ambient__orb--two"></span>
+      <span class="ambient__grain"></span>
+    </div>
+
+    <header class="site-header shell">
+      <div class="brand-block">
+        <p class="eyebrow">KIRO HOOK CEREMONY · 代码生命周期实验</p>
+        <h1>代码守灵堂</h1>
+        <p class="tagline">Kiro 删除代码，Hooks 自动验证删除是否安全。</p>
+      </div>
+
+      <div class="telemetry" aria-label="数据连接状态">
+        <p class="mode-chip" id="mode-chip" data-mode="waiting">
+          <span class="mode-chip__dot" aria-hidden="true"></span>
+          <span id="mode-label">等待墓园数据</span>
+        </p>
+        <p class="updated-at" id="updated-at">尚未接到 Kiro 事件</p>
+        <a class="guide-link" href="#start-here">录屏时不知道下一步？看导演台 ↓</a>
+      </div>
+    </header>
+
+    <main id="main-content">
+      <section class="onboarding shell" id="start-here" aria-labelledby="onboarding-title">
+        <div class="onboarding__intro">
+          <p class="section-index">01 / 录屏导演台</p>
+          <h2 id="onboarding-title">删掉旧代码，测试失败<br>它就会“诈尸”。</h2>
+          <p>Kiro 修好仍在调用它的代码，测试通过，同一块墓碑才会安息。录屏时只需要在 Kiro 和本页之间切换两次。</p>
+          <div class="screen-route" aria-label="Kiro → 网页 → Kiro → 网页">
+            <span>Kiro 删除</span>
+            <b aria-hidden="true">→</b>
+            <span>网页诈尸</span>
+            <b aria-hidden="true">→</b>
+            <span>Kiro 修复</span>
+            <b aria-hidden="true">→</b>
+            <span>网页安息</span>
+          </div>
+          <div class="mode-legend" aria-label="演示模式说明">
+            <span><i class="mode-dot mode-dot--live" aria-hidden="true"></i>现场：Kiro Hook 真实写入</span>
+            <span><i class="mode-dot mode-dot--replay" aria-hidden="true"></i>回放：只看视觉效果</span>
+          </div>
+        </div>
+
+        <div class="director-wrap">
+          <div class="director-card" id="director-card" data-phase="replay">
+            <div class="director-card__body">
+              <p class="micro-label" id="director-kicker">录屏准备 · 第 1 步</p>
+              <h3 id="director-action-title">当前是回放数据，还不是比赛证据</h3>
+              <p id="director-action-copy">先切到 Kiro，让 Agent 只删除演示旧模块；真实 Hook 会自动把结果写回本页。</p>
+            </div>
+            <button class="prompt-button" id="director-action-button" type="button" data-prompt="delete">
+              复制真实删除指令
+            </button>
+          </div>
+          <p class="copy-status" id="copy-status" role="status" aria-live="polite">
+            录屏从 Kiro 开始；这个页面负责展示 Hook 和测试结果。
+          </p>
+        </div>
+      </section>
+
+      <div class="shell page-grid">
+      <section class="ritual-panel" aria-labelledby="ritual-title">
+        <div class="section-heading">
+          <div>
+            <p class="section-index">02 / 当前仪式</p>
+            <h2 id="ritual-title">Kiro 自动验证结果</h2>
+          </div>
+          <span class="state-badge" id="state-badge" data-state="pending">等待 Hook 验证</span>
+        </div>
+
+        <div class="grave-scene" id="grave-scene" data-state="pending">
+          <div class="moon" aria-hidden="true"></div>
+          <div class="mist mist--back" aria-hidden="true"></div>
+
+          <div class="ghost" aria-hidden="true">
+            <span class="ghost__face">&lt;/&gt;</span>
+            <span class="ghost__tail ghost__tail--one"></span>
+            <span class="ghost__tail ghost__tail--two"></span>
+            <span class="ghost__tail ghost__tail--three"></span>
+          </div>
+
+          <div class="grave-wrap">
+            <div class="grave-shadow" aria-hidden="true"></div>
+            <article class="grave-stone" aria-labelledby="grave-name">
+              <span class="grave-stone__seal" aria-hidden="true">⌘</span>
+              <p class="grave-stone__overline">IN MEMORY OF</p>
+              <h3 id="grave-name">尚无逝者</h3>
+              <p class="grave-path" id="grave-path">等待 Kiro 删除演示模块</p>
+
+              <dl class="grave-metrics">
+                <div>
+                  <dt>服役</dt>
+                  <dd id="age-days">—</dd>
+                </div>
+                <div>
+                  <dt>提交</dt>
+                  <dd id="commit-count">—</dd>
+                </div>
+                <div>
+                  <dt>代码</dt>
+                  <dd id="line-count">—</dd>
+                </div>
+              </dl>
+
+              <p class="epitaph" id="epitaph">墓碑尚未落款。</p>
+            </article>
+
+            <div class="flowers" aria-hidden="true">
+              <span class="flower flower--left"><i></i></span>
+              <span class="flower flower--right"><i></i></span>
+            </div>
+          </div>
+
+          <div class="earth" aria-hidden="true"></div>
+          <div class="mist mist--front" aria-hidden="true"></div>
+        </div>
+
+        <div class="autopsy" aria-labelledby="autopsy-title">
+          <div class="autopsy__heading">
+            <div>
+              <p class="micro-label">REGRESSION AUTOPSY</p>
+              <h3 id="autopsy-title">回归测试证据</h3>
+            </div>
+            <code id="test-command">npm run test:health</code>
+          </div>
+
+          <div class="heartbeat" aria-hidden="true">
+            <svg viewBox="0 0 420 62" preserveAspectRatio="none">
+              <path class="heartbeat__base" d="M0 32H104l12-18 18 38 21-50 22 30h243"></path>
+              <path class="heartbeat__pulse" d="M0 32H104l12-18 18 38 21-50 22 30h243"></path>
+            </svg>
+          </div>
+
+          <p class="test-status" id="test-status" role="status" aria-live="polite">
+            正在等待第一条删除事件。
+          </p>
+
+          <ol class="ritual-steps" aria-label="代码葬礼进度">
+            <li data-step="deleted"><span>01</span> Kiro 删除旧模块</li>
+            <li data-step="tested"><span>02</span> Hook 暴露残留依赖</li>
+            <li data-step="verdict"><span>03</span> Kiro 修复并通过</li>
+          </ol>
+        </div>
+
+        <div class="replay-control">
+          <div>
+            <p class="micro-label">JUDGE DEMO</p>
+            <p id="replay-note">只在浏览器中演示三种状态，不会修改真实墓园数据。</p>
+          </div>
+          <button class="replay-button" id="replay-button" type="button" aria-pressed="false">
+            播放本地回放（非实时）
+          </button>
+        </div>
+      </section>
+
+      <aside class="registry-panel" aria-labelledby="registry-title">
+        <div class="section-heading section-heading--compact">
+          <div>
+            <p class="section-index">03 / 墓园名册</p>
+            <h2 id="registry-title">近期离场</h2>
+          </div>
+          <span class="registry-count" id="registry-count">0 座</span>
+        </div>
+
+        <ol class="grave-list" id="grave-list">
+          <li class="grave-list__empty">
+            <span aria-hidden="true">＋</span>
+            <p>名册仍是空的。<br>下一次由 Kiro 完成的删除会在这里立碑。</p>
+          </li>
+        </ol>
+
+        <div class="privacy-note">
+          <span aria-hidden="true">◇</span>
+          <p><strong>只纪念元数据</strong><br>文件名、Git 年龄和测试结果留在本机；源码不会进入墓志铭。</p>
+        </div>
+      </aside>
+      </div>
+    </main>
+
+    <footer class="site-footer shell">
+      <p>删除不是终点，<strong>验证才是葬礼。</strong></p>
+      <p class="footer-mark">CODE FUNERAL HALL / 2026</p>
+    </footer>
+  </body>
+</html>

@@ -1,0 +1,17 @@
+{
+  "version": "v1",
+  "hooks": [
+    {
+      "name": "Settle active grave after task",
+      "description": "Run the project health check after a Kiro Spec task and mark the active grave as resurrected or resting.",
+      "trigger": "PostTaskExec",
+      "action": {
+        "type": "command",
+        "command": "node scripts/undertaker.mjs settle"
+      },
+      "timeout": 60,
+      "enabled": true
+    }
+  ]
+}
+

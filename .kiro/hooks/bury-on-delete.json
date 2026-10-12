@@ -1,0 +1,18 @@
+{
+  "version": "v1",
+  "hooks": [
+    {
+      "name": "Bury deleted demo module",
+      "description": "Create or update a metadata-only grave when Kiro deletes a demo .mjs file.",
+      "trigger": "PostFileDelete",
+      "matcher": "demo-src[\\\\/].*\\.mjs$",
+      "action": {
+        "type": "command",
+        "command": "node scripts/undertaker.mjs bury"
+      },
+      "timeout": 30,
+      "enabled": true
+    }
+  ]
+}
+
