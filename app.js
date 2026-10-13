@@ -19,8 +19,15 @@ const STATE_COPY = Object.freeze({
 });
 
 const KIRO_PROMPTS = Object.freeze({
-  delete: '/code-undertaker 请使用 #spec:code-funeral-hall 执行任务 6.1。先检查调用者和 Git 状态，只删除 demo-src/legacy-ghost.mjs；不要修改 active-consumer.mjs，也不要提前修复测试。',
-  fix: "删除 demo-src/legacy-ghost.mjs 后，demo-src/active-consumer.mjs 仍导入该模块，导致项目健康测试失败。预期 memorialMessage('旧接口') 仍返回 '旧接口 已归档'。不得恢复 legacy-ghost.mjs，不得改变该公开行为，也不得修改墓园 JSON 来伪造通过。请生成并执行最小 Bugfix Spec。",
+  assess: '请先在 Kiro Agent Picker 选择 Code Undertaker，运行 npm run funeral:assess -- demo-src/legacy-ghost.mjs。读取 Steering、Undertaker Skill、Git 状态和基线测试，报告 tracked、workspaceClean、baselinePassed、dependentCount 与 risk。只报告，不删除、不修复；报告完成后等待我明确批准。',
+  delete: '我已审阅 Code Undertaker 的 assessment，并明确批准退役。请在 Kiro 的 code-funeral-hall Feature Spec 中执行任务 7.2，由 Spec 任务入口执行；不要在普通聊天中直接删除，确保任务完成后形成 PostTaskExec 证据链。只删除 demo-src/legacy-ghost.mjs；不要修改 active-consumer.mjs，不要提前修复测试。',
+  fix: "删除 demo-src/legacy-ghost.mjs 后，demo-src/active-consumer.mjs 仍导入该模块，导致健康测试失败。请让 Code Undertaker 诊断根因并生成最小 Bugfix Spec；不得恢复 legacy-ghost.mjs，不得改变 memorialMessage('旧接口') 返回 '旧接口 已归档' 的公开行为，也不得修改墓园 JSON 伪造通过。",
+});
+
+const COPY_STATUS = Object.freeze({
+  assess: '尸检指令已复制：先在 Kiro Agent Picker 选择 Code Undertaker，报告后不要批准删除。',
+  delete: '受控删除指令已复制：切回 Kiro，从 Feature Spec 任务 7.2 入口执行。',
+  fix: '修复指令已复制：请在出现“已诈尸”后再交给 Code Undertaker。',
 });
 
 const elements = {
@@ -47,11 +54,20 @@ const elements = {
   directorCopy: document.querySelector('#director-action-copy'),
   directorButton: document.querySelector('#director-action-button'),
   copyStatus: document.querySelector('#copy-status'),
+  agentConsole: document.querySelector('#agent-console'),
+  evidenceAgent: document.querySelector('#evidence-agent'),
+  evidenceTarget: document.querySelector('#evidence-target'),
+  evidenceGit: document.querySelector('#evidence-git'),
+  evidenceBaseline: document.querySelector('#evidence-baseline'),
+  evidenceDependents: document.querySelector('#evidence-dependents'),
+  evidenceRisk: document.querySelector('#evidence-risk'),
+  evidenceStage: document.querySelector('#evidence-stage'),
   promptButtons: [...document.querySelectorAll('.prompt-button')],
   ritualSteps: [...document.querySelectorAll('.ritual-steps li')],
 };
 
 const validStates = new Set(Object.keys(STATE_COPY));
+const validRisks = new Set(['low', 'high', 'blocked']);
 const dateFormatter = new Intl.DateTimeFormat('zh-CN', {
   month: '2-digit',
   day: '2-digit',
@@ -73,6 +89,27 @@ function safeText(value, fallback = '', maxLength = 180) {
 
 function safeCount(value) {
   return Number.isFinite(value) ? Math.max(0, Math.round(value)) : null;
+}
+
+function safeBoolean(value) {
+  return typeof value === 'boolean' ? value : null;
+}
+
+function normalizeAssessment(value) {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return null;
+
+  const risk = safeText(value.risk, 'blocked', 16);
+  return {
+    id: safeText(value.id, 'unknown-assessment', 100),
+    agentId: safeText(value.agentId, 'unknown-agent', 100),
+    targetPath: safeText(value.targetPath, '未知目标'),
+    assessedAt: safeText(value.assessedAt, ''),
+    tracked: safeBoolean(value.tracked),
+    workspaceClean: safeBoolean(value.workspaceClean),
+    baselinePassed: safeBoolean(value.baselinePassed),
+    dependentCount: safeCount(value.dependentCount),
+    risk: validRisks.has(risk) ? risk : 'blocked',
+  };
 }
 
 function normalizeTest(value) {
@@ -118,6 +155,7 @@ function normalizeDocument(value) {
     mode: value.mode === 'live' ? 'live' : 'replay',
     activeId: safeText(value.activeId, ''),
     updatedAt: safeText(value.updatedAt, ''),
+    assessment: normalizeAssessment(value.assessment),
     graves,
   };
 }
@@ -137,7 +175,7 @@ function activeGraveOf(documentData) {
     ?? null;
 }
 
-function setMode(mode, updatedAt, localReplay = false) {
+function setMode(mode, updatedAt, localReplay = false, hasAssessment = false, hasGrave = false) {
   let label = '回放数据 · 非实时';
   let modeValue = 'replay';
 
@@ -145,7 +183,9 @@ function setMode(mode, updatedAt, localReplay = false) {
     label = '本地演示 · 非实时';
     modeValue = 'local';
   } else if (mode === 'live') {
-    label = 'Kiro Hook · 实时';
+    label = hasGrave
+      ? 'Kiro Hook · 实时'
+      : hasAssessment ? 'Kiro Agent · 现场评估' : '本地现场 · 等待 Agent';
     modeValue = 'live';
   }
 
@@ -162,9 +202,7 @@ async function copyKiroPrompt(button) {
 
   try {
     await navigator.clipboard.writeText(prompt);
-    elements.copyStatus.textContent = button.dataset.prompt === 'delete'
-      ? '第一步指令已复制：切回 Kiro，粘贴后核对它只删除一个演示文件。'
-      : '修复指令已复制：请在出现“已诈尸”后再交给 Kiro。';
+    elements.copyStatus.textContent = COPY_STATUS[button.dataset.prompt];
   } catch {
     elements.copyStatus.textContent = `浏览器未允许复制，请手动选择这段指令：${prompt}`;
   }
@@ -182,6 +220,8 @@ function renderDirector(documentData, activeGrave, options = {}) {
   const director = getDemoDirector({
     mode: documentData.mode,
     state: activeGrave?.state,
+    risk: documentData.assessment?.risk,
+    hasAssessment: Boolean(documentData.assessment),
     hasGrave: Boolean(activeGrave),
     localReplay: options.localReplay === true,
   });
@@ -205,7 +245,11 @@ function renderDirector(documentData, activeGrave, options = {}) {
     elements.copyStatus.textContent = director.status;
   }
 
-  const reachedStep = completedRitualSteps(activeGrave?.state, Boolean(activeGrave));
+  const reachedStep = completedRitualSteps(
+    activeGrave?.state,
+    Boolean(activeGrave),
+    Boolean(documentData.assessment),
+  );
   elements.ritualSteps.forEach((step, index) => {
     step.dataset.progress = index < reachedStep
       ? 'done'
@@ -213,6 +257,64 @@ function renderDirector(documentData, activeGrave, options = {}) {
         ? 'active'
         : 'waiting';
   });
+}
+
+function assessmentStage(assessment, grave) {
+  if (!assessment) return '选择 Agent 并先尸检';
+  if (assessment.risk === 'blocked') return '阻塞 · 禁止删除';
+  if (!grave) return '风险已评估 · 等待用户批准';
+  if (grave.state === 'resurrected') return 'Agent 诊断 · 生成 Bugfix Spec';
+  if (grave.state === 'resting') return '验证通过 · 安全退役';
+  return 'Hook 裁决中';
+}
+
+function renderEvidence(assessment, grave) {
+  if (!assessment) {
+    elements.evidenceAgent.textContent = '等待在 Kiro 中选择';
+    elements.evidenceTarget.textContent = '等待尸检目标';
+    elements.evidenceGit.textContent = '尚未检查';
+    elements.evidenceBaseline.textContent = '尚未运行';
+    elements.evidenceDependents.textContent = '—';
+    elements.evidenceRisk.textContent = '等待评估';
+    elements.evidenceRisk.dataset.risk = 'waiting';
+    elements.evidenceStage.textContent = assessmentStage(null, grave);
+    elements.agentConsole.dataset.stage = 'assess';
+    return;
+  }
+
+  const agentName = assessment.agentId === 'code-undertaker'
+    ? 'Code Undertaker'
+    : assessment.agentId;
+  const tracked = assessment.tracked === null
+    ? '跟踪状态未知'
+    : assessment.tracked ? '目标已被 Git 跟踪' : '目标未被 Git 跟踪';
+  const workspace = assessment.workspaceClean === null
+    ? '工作区状态未知'
+    : assessment.workspaceClean ? '工作区干净' : '存在未提交改动';
+  const riskLabels = {
+    low: 'LOW · 可审查',
+    high: 'HIGH · 需人工批准',
+    blocked: 'BLOCKED · 禁止删除',
+  };
+
+  elements.evidenceAgent.textContent = assessment.assessedAt
+    ? `${agentName} · ${formatDate(assessment.assessedAt)}`
+    : agentName;
+  elements.evidenceTarget.textContent = assessment.targetPath;
+  elements.evidenceGit.textContent = `${tracked} · ${workspace}`;
+  elements.evidenceBaseline.textContent = assessment.baselinePassed === null
+    ? '结果未知'
+    : assessment.baselinePassed ? '健康测试通过' : '基线测试失败';
+  elements.evidenceDependents.textContent = assessment.dependentCount === null
+    ? '未知'
+    : `${assessment.dependentCount} 个调用者`;
+  const stage = assessmentStage(assessment, grave);
+  elements.evidenceRisk.textContent = riskLabels[assessment.risk];
+  elements.evidenceRisk.dataset.risk = assessment.risk;
+  elements.evidenceStage.textContent = stage;
+  elements.agentConsole.dataset.stage = assessment.risk === 'blocked'
+    ? 'blocked'
+    : grave?.state ?? 'approval';
 }
 
 function testStatusFor(grave) {
@@ -281,10 +383,16 @@ function renderRegistry(graves) {
 }
 
 function renderDocument(documentData, options = {}) {
-  setMode(documentData.mode, documentData.updatedAt, options.localReplay === true);
-  renderRegistry(documentData.graves);
-
   const activeGrave = activeGraveOf(documentData);
+  setMode(
+    documentData.mode,
+    documentData.updatedAt,
+    options.localReplay === true,
+    Boolean(documentData.assessment),
+    Boolean(activeGrave),
+  );
+  renderRegistry(documentData.graves);
+  renderEvidence(documentData.assessment, activeGrave);
   renderDirector(documentData, activeGrave, options);
   if (!activeGrave) {
     setState('pending');
@@ -363,9 +471,21 @@ function replayDocument(state) {
   const grave = { ...baseGrave, id: 'local-replay-grave', state, test };
 
   return {
+    version: 2,
     mode: 'replay',
     activeId: grave.id,
     updatedAt: new Date().toISOString(),
+    assessment: {
+      id: 'local-replay-assessment',
+      agentId: 'code-undertaker',
+      targetPath: 'demo-src/legacy-ghost.mjs',
+      assessedAt: new Date().toISOString(),
+      tracked: true,
+      workspaceClean: true,
+      baselinePassed: true,
+      dependentCount: 1,
+      risk: 'high',
+    },
     graves: [grave],
   };
 }
@@ -380,8 +500,8 @@ function exitReplay() {
   replayActive = false;
   elements.replayButton.setAttribute('aria-pressed', 'false');
   elements.replayButton.textContent = '播放本地回放（非实时）';
-  elements.replayNote.textContent = '只在浏览器中演示三种状态，不会修改真实墓园数据。';
-  renderDocument(latestDocument ?? { mode: 'replay', activeId: '', updatedAt: '', graves: [] });
+  elements.replayNote.textContent = '只在浏览器中演示尸检和三种裁决状态，不会修改真实墓园数据。';
+  renderDocument(latestDocument ?? { mode: 'replay', activeId: '', updatedAt: '', assessment: null, graves: [] });
   pollCemetery();
 }
 
@@ -416,6 +536,6 @@ document.addEventListener('visibilitychange', () => {
   if (document.visibilityState === 'visible') pollCemetery();
 });
 
-renderDocument({ mode: 'replay', activeId: '', updatedAt: '', graves: [] });
+renderDocument({ mode: 'replay', activeId: '', updatedAt: '', assessment: null, graves: [] });
 pollCemetery();
 window.setInterval(pollCemetery, 2000);

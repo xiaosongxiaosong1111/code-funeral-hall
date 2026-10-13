@@ -2,11 +2,12 @@
 
 ## 项目愿景
 
-“代码守灵堂”把一次不可见的代码删除，变成可解释、可验证的告别仪式：Kiro 删除演示模块后，系统为它立碑；测试失败时它以“幽灵”状态复活；修复依赖且测试通过后，它才真正安息。
+“代码守灵堂”把一次不可见的代码删除，变成可解释、可验证的告别仪式：Code Undertaker Agent 先调查风险并请求批准，Kiro 删除演示模块后系统为它立碑；测试失败时它以“幽灵”状态复活；修复依赖且测试通过后，它才真正安息。
 
 ## 术语
 
 - **葬礼**：Kiro Agent 删除 `demo-src/**/*.mjs` 后，由 Hook 记录墓碑的流程。
+- **尸检**：Code Undertaker 在删除前对固定目标执行的只读 assessment，记录 Git、工作区、基线测试和依赖数量事实。
 - **墓碑**：仅包含文件元数据和验证结果的 JSON 记录，不包含源码。
 - **诈尸**：删除后项目健康测试失败，墓碑进入 `resurrected` 状态。
 - **安息**：删除后项目健康测试通过，墓碑进入 `resting` 状态。
@@ -93,3 +94,19 @@
 2. WHEN Kiro 删除演示文件 THEN THE SYSTEM SHALL 在同一段录制中展示墓碑产生以及测试失败后的诈尸状态。
 3. WHEN Kiro 根据 Bugfix Spec 修复依赖 THEN THE SYSTEM SHALL 展示测试转为通过以及墓碑进入安息状态。
 4. IF 当前 Kiro 构建未触发 `PostFileDelete` THEN THE SYSTEM SHALL 允许把同一登记命令临时改由 `Stop` 触发，并继续通过 `git diff` 识别删除；不得把该降级描述成文件删除 Hook 成功。
+
+## 需求 7：由专用 Agent 先评估再退役
+
+### 用户故事
+
+作为开发者，我希望在 Kiro 中选择 Code Undertaker，让它基于项目知识先调查删除风险、请求精确授权并在回归后完成最小修复，从而证明 AI Agent 参与的是可审计的维护决策，而不只是页面制作。
+
+### 验收标准
+
+1. WHEN 用户要求退役演示模块 THEN THE AGENT SHALL 先执行唯一的固定目标命令 `npm run funeral:assess -- demo-src/legacy-ghost.mjs`，报告目标是否受 Git 跟踪、工作区是否干净、基线测试是否通过、存活依赖数量和派生风险。
+2. IF 目标未跟踪、存在无关工作区改动或基线测试失败 THEN THE SYSTEM SHALL 把风险设为 `blocked`，且 Agent 不得继续删除。
+3. IF 预检未被阻断 THEN THE AGENT SHALL 请求用户明确批准精确目标 `demo-src/legacy-ghost.mjs`，并仅从 Kiro Spec 任务入口执行 `.kiro/specs/code-funeral-hall/tasks.md` 的任务 7.2；不得在普通聊天中直接删除，预检结果本身也不得被当作授权。
+4. WHEN 删除导致健康测试失败 THEN THE AGENT SHALL 基于证据创建或执行最小的 Bugfix Spec，保持公开行为且不得恢复已退役模块。
+5. WHEN 系统保存 assessment THEN THE SYSTEM SHALL 使用 cemetery v2 的严格字段，只记录稳定 ID、固定 Agent/目标、时间、三个布尔事实、依赖数量和 `low | high | blocked` 风险；不得保存依赖路径、源码、命令输出或自由文本推理。
+6. WHEN Agent Knowledge Base 在当前 Kiro 构建中不可用 THEN THE AGENT SHALL 直接读取 `code-undertaker` Skill references 并如实说明降级，不得跳过安全契约。
+7. THE SYSTEM SHALL 只宣称支持当前受控 `.mjs` 演示，不得把它描述为通用多语言代码分析或任意代码库自动删除能力。

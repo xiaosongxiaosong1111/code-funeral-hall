@@ -1,170 +1,145 @@
-# 代码守灵堂：AI 接手与回家录屏交接说明
+# 代码守灵堂：AI 接手与回家录屏说明
 
 > 仓库：<https://github.com/xiaosongxiaosong1111/code-funeral-hall>
 >
-> 面向对象：接手本项目、帮助用户在家完成 Kiro 现场演示和 3–5 分钟参赛录屏的 AI。
+> 用途：让家中的 AI 在不了解历史聊天的情况下，安全接管项目并协助完成 Kiro 线上赛录屏。
 
-## 0. 接手后的第一原则
+## 0. 先理解这次升级
 
-当前仓库保存的是**可重复录制的安全基线**。在用户明确说“开始正式录制”以前：
+项目没有丢掉“代码守灵堂、诈尸、安息”的鬼点子，而是把它从纯视觉梗升级为 **Kiro 原生代码退役 Agent**：
 
+- 产品仍叫 **代码守灵堂 / Code Funeral Hall**；
+- Kiro Agent 叫 **Code Undertaker / 代码入殓师**；
+- 页面是 Agent 的证据台；
+- 墓碑、幽灵和白花是退役结果的可视化。
+
+“鬼点子”不等于必须真的讲鬼。这里真正的巧思是工程语义映射：存活依赖叫“诈尸”，回归测试是“死亡证明”，验证通过才叫“安息”。趣味负责让人记住，Agent 和可审计证据负责让项目成立。
+
+一句话定位：
+
+> 别人让 AI 写代码，我们让 Agent 为删除代码负责：调查风险、请求批准、执行退役，并证明旧代码真的可以离开。
+
+## 1. 接手后的第一原则
+
+当前仓库应保持可重复录制的安全基线。在用户明确说“开始正式录制”以前：
+
+- 不要运行 `npm run funeral:assess -- demo-src/legacy-ghost.mjs`；
 - 不要删除 `demo-src/legacy-ghost.mjs`；
 - 不要修改 `demo-src/active-consumer.mjs`；
-- 不要手工把 `data/cemetery.json` 改成 `live`、`resting` 或伪造测试结果；
-- 不要勾选 `.kiro/specs/code-funeral-hall/tasks.md` 中尚未真实执行的任务；
+- 不要手改 `data/cemetery.json` 制造 `live`、`high`、`resurrected` 或 `resting`；
+- 不要勾选尚未真实执行的 Spec 任务；
 - 不要运行 `git reset --hard`、`git clean` 或宽泛恢复命令；
-- 不要把浏览器“本地回放”冒充成 Kiro Hook 现场证据。
+- 不要把回放数据、页面上的 `agentId` 或动画冒充成 Kiro 运行证据。
 
-如果接手者不是 Kiro，可以帮助检查、解释、启动页面和排障，但正式视频中的删除和修复必须由 **Kiro Agent** 在同一工作区真实执行。
+`funeral:assess` 对源码是只读的，但会把脱敏评估写入 `data/cemetery.json`。因此正式录屏应在镜头中由选中的 Code Undertaker 调用它，而不是提前手工运行。
 
-## 1. 可以直接发给接手 AI 的提示词
+## 2. 可以直接发给家中 AI 的提示词
 
 ```text
-请先完整阅读 docs/AI-HANDOFF.md，并按其中的“只读接管检查”执行。
+请先完整阅读 docs/AI-HANDOFF.md，再做只读接管检查。
 
-当前目标是帮助我完成“代码守灵堂”的 3–5 分钟参赛录屏。未经我明确说“开始正式录制”，不要删除 demo-src/legacy-ghost.mjs，不要修改 demo-src/active-consumer.mjs，不要伪造 data/cemetery.json，也不要执行任何会丢失本地改动的 Git 命令。
+目标是协助我录制“代码守灵堂”的 Kiro Agent 演示。未经我明确说“开始正式录制”，不要运行 funeral:assess，不要删除 demo-src/legacy-ghost.mjs，不要修改 demo-src/active-consumer.mjs，不要手改 data/cemetery.json，也不要执行会丢失本地改动的 Git 命令。
 
-先告诉我：
-1. 当前 Git 状态是否干净；
-2. 基线测试和项目校验是否通过；
-3. Kiro 是否识别到 Feature Spec、Workspace Skill 和两个 Hooks；
-4. 页面当前是“回放数据”还是“Kiro Hook 实时”；
-5. 正式录制的下一步唯一动作是什么。
+先向我报告：
+1. Git 工作区和分支状态；
+2. npm test 与 npm run validate 的结果；
+3. Kiro Agent Picker 是否能看到 Code Undertaker；
+4. Feature Spec、Skill、Steering 和两个 Hooks 是否被当前 Kiro 识别；
+5. Knowledge Base 在当前 IDE 中是“已验证可搜索”还是“尚未实机验证”；
+6. 页面当前是 replay 还是 live；
+7. 开始正式录制后的第一个动作。
 
-确认准备无误后停下来，等我说“开始正式录制”。
+只报告事实。确认准备无误后停下来，等我说“开始正式录制”。
 ```
 
-## 2. 一句话说明项目
+如果接手者不是 Kiro，它可以检查文件、运行基线测试、启动网页和解释流程，但不能声称自己验证了 Kiro Agent Picker、Knowledge Base 或 Hooks。
 
-“代码守灵堂”把一次不可见的代码删除变成可解释、可验证的数字葬礼：Kiro 删除旧模块后，Hooks 自动立碑并运行健康测试；测试失败，旧代码“诈尸”；Kiro 修复残留依赖且测试通过后，同一块墓碑才真正“安息”。
+## 3. Agent、工具和页面分别负责什么
 
-项目的核心结论是：
+本项目故意把“智能决策”和“确定性事实”分开：
 
-> 删除文件不是重构完成，测试通过才是安全删除的证据。
+| 层 | 职责 | 不能冒充什么 |
+|---|---|---|
+| Kiro `Code Undertaker` | 读取知识和 Spec、组织流程、请求授权、诊断失败、创建并执行最小 Bugfix | 不能捏造测试或 Git 事实 |
+| `funeral:assess` | 确定性检查 Git、工作区、基线测试和依赖数量，生成 v2 assessment | 不是大模型，也不是自主 Agent |
+| 两个 Hooks | 删除后立碑，任务后运行健康测试并裁决 | 不负责替用户批准删除 |
+| Evidence Console | 展示 assessment 和阶段 | 页面标签不是执行证明 |
+| 墓园视觉 | 把 `pending / resurrected / resting` 变成墓碑、幽灵和白花 | 动画不是测试结果 |
 
-## 3. 它不只是一个前端页面
+项目不接 OpenAI、通义、DeepSeek 等外部模型 API。Kiro 本身就是比赛要展示的 AI Agent；额外套一个聊天接口只会稀释重点。
 
-网页只是最终的可视化层。真实闭环包含：
-
-1. **Feature Spec**：定义需求、设计、约束和可执行任务。
-2. **Steering**：持续约束产品叙事、目录结构、技术栈、隐私和删除边界。
-3. **Workspace Skill**：指导 Kiro 安全删除、识别“诈尸”并创建 Bugfix Spec。
-4. **PostFileDelete Hook**：在 Kiro 删除受控演示文件后运行 `bury`，登记墓碑。
-5. **PostTaskExec Hook**：任务结束后运行 `settle`，用健康测试裁定状态。
-6. **Git**：提供可审计的删除事实和历史元数据。
-7. **Node.js 领域逻辑**：过滤路径、生成墓碑、运行测试并原子写入 JSON。
-8. **静态页面**：轮询 `data/cemetery.json`，把状态变成墓碑、幽灵和白花。
+## 4. 完整因果链
 
 ```mermaid
-flowchart LR
-    A[Kiro Agent] -->|删除旧模块| B[PostFileDelete Hook]
-    B --> C[undertaker bury]
-    C --> D[Git 删除事实与历史]
-    D --> E[data/cemetery.json pending]
-    M[Spec 任务完成] --> F[PostTaskExec Hook]
-    F --> G[undertaker settle]
-    G --> H[node:test 健康测试]
-    H -->|失败| I[resurrected 诈尸]
-    I --> J[Kiro Bugfix Spec 修复消费者]
-    J --> M
-    H -->|通过| K[resting 安息]
-    E --> L[浏览器每 2 秒轮询展示]
-    I --> L
-    K --> L
+flowchart TD
+    A[Agent Picker 选择 Code Undertaker] --> B[加载 Steering / Spec / Skill / Knowledge]
+    B --> C[Agent 调用 funeral:assess]
+    C --> D[确定性检查 Git / 工作区 / 基线测试 / 依赖数]
+    D --> E[v2 assessment: high, dependentCount 1]
+    E --> F[Agent 请求批准精确删除目标]
+    F -->|用户批准| G[在 code-funeral-hall Feature Spec 点击/运行任务 7.2]
+    G --> G2[Agent 只删除 legacy-ghost.mjs]
+    G2 --> H[PostFileDelete Hook 立碑]
+    H --> I[PostTaskExec Hook 运行健康测试]
+    I -->|失败| J[resurrected: 代码诈尸]
+    J --> K[同一 Agent 创建并执行最小 Bugfix Spec]
+    K --> L[PostTaskExec 再次裁决]
+    L -->|通过| M[resting: 代码安息]
+    E --> N[Evidence Console]
+    H --> O[墓园结果可视化]
+    J --> O
+    M --> O
 ```
 
-## 4. 真实演示故事
+录像必须守住这条因果链。Kiro 思考和测试等待可以加速，但不要把不同克隆、不同录次的结果拼成一条假链。
 
-录制前，`demo-src/active-consumer.mjs` 仍然导入 `demo-src/legacy-ghost.mjs`：
+## 5. 为什么评估结果必须是 high
+
+受控演示基线中：
 
 ```text
-active-consumer.mjs → legacy-ghost.mjs
+demo-src/active-consumer.mjs → demo-src/legacy-ghost.mjs
 ```
 
-完整故事必须保持以下因果顺序：
+`npm run funeral:assess -- demo-src/legacy-ghost.mjs` 应产生以下受控事实：
 
-```text
-Kiro 只删除 legacy-ghost.mjs
-  → PostFileDelete 识别 Git 删除并立碑
-  → 墓碑进入 pending
-  → PostTaskExec 运行健康测试
-  → active-consumer 的旧 import 导致测试失败
-  → 墓碑进入 resurrected，页面显示红色幽灵
-  → Kiro 创建并执行最小 Bugfix Spec
-  → 不恢复旧文件，只修复 active-consumer
-  → 公开行为仍为 memorialMessage('旧接口') === '旧接口 已归档'
-  → 健康测试通过
-  → 同一块墓碑进入 resting，页面显示白花
-```
+- `agentId`: `code-undertaker`；
+- `targetPath`: `demo-src/legacy-ghost.mjs`；
+- `tracked`: `true`；
+- `workspaceClean`: `true`；
+- `baselinePassed`: `true`；
+- `dependentCount`: `1`；
+- `risk`: `high`。
 
-第一次任务**必须只删除、不修复**。如果 Kiro 在第一次任务里同时修改消费者，受控失败就不会发生，视频也失去最重要的“诈尸”证据。
+风险语义：
 
-## 5. 当前仓库基线
+- `low`：前置检查通过且没有存活依赖；
+- `high`：前置检查通过，但仍有存活依赖；
+- `blocked`：未跟踪、工作区存在无关改动或基线测试失败等前置条件不满足。
 
-接手时应看到：
+评估只保存数量，不保存消费者路径、源码、命令原始输出或模型思维链。`high` 不是 Agent 随口判断，而是本地规则根据 `dependentCount` 生成的可复现结果。
 
-- 分支：`main`；
-- `demo-src/legacy-ghost.mjs` 存在且已被 Git 跟踪；
-- `demo-src/active-consumer.mjs` 仍导入旧模块；
-- `data/cemetery.json` 是 `mode: "replay"` 的脱敏示例数据；
-- Spec 任务 1–5 已完成，任务 6–9 留给真实 Kiro 录制；
-- 页面右上角初始显示“回放数据 · 非实时”；
-- 导演台提示“当前是回放数据，还不是比赛证据”；
-- 基线共有 16 项自动化测试；编写本交接文档时的验证结果是 16/16 通过。覆盖率命令只统计被 Node 测试进程采集到的模块，并非浏览器代码在内的全仓覆盖率。
-- 回放数据里的“666 天、13 次提交”是为了展示版式的示例值，不代表本仓库已经产生过这次真实事件。
+## 6. 关键文件
 
-这些是准备状态，不代表真实 Hook 已经在用户家中的 Kiro 环境执行成功。
-
-## 6. 关键目录和文件
-
-| 路径 | 职责 | 录屏时是否展示 |
+| 路径 | 作用 | 录屏是否展示 |
 |---|---|---|
-| `.kiro/specs/code-funeral-hall/` | Feature Spec 的需求、设计和任务 | 是，快速展示 |
-| `.kiro/steering/` | 始终生效的产品、技术、结构、安全约束 | 可一带而过 |
-| `.kiro/skills/code-undertaker/SKILL.md` | 安全葬礼与 Bugfix 工作流 | 是 |
-| `.kiro/hooks/bury-on-delete.json` | `PostFileDelete` 触发立碑 | 是 |
-| `.kiro/hooks/settle-after-task.json` | `PostTaskExec` 触发健康测试裁定 | 是 |
-| `demo-src/legacy-ghost.mjs` | 唯一允许 Kiro 删除的演示旧模块 | 是 |
-| `demo-src/active-consumer.mjs` | 删除后故意断裂、随后被最小修复的消费者 | 是 |
-| `scripts/cemetery.mjs` | 路径过滤、墓碑模型、状态转换和数据校验 | 不必逐行展示 |
-| `scripts/undertaker.mjs` | `bury` / `settle` 命令、Git 与测试编排 | 可简要展示 |
-| `data/cemetery.json` | 页面唯一运行数据源，只允许公开元数据 | 结尾展示 |
-| `demo-director.mjs` | 根据实时状态告诉录屏者下一步唯一动作 | 不必展示源码 |
-| `index.html` / `app.js` / `styles.css` | 墓园视觉和自动轮询页面 | 是，作为主要画面 |
+| `.kiro/agents/code-undertaker.md` | Agent Picker 中的 Code Undertaker 配置与系统提示 | 是 |
+| `.kiro/specs/code-funeral-hall/` | Feature Spec；删除必须从这里点击/运行任务 7.2 | 是 |
+| `.kiro/steering/` | 产品、结构、技术和安全约束 | 快速展示 |
+| `.kiro/skills/code-undertaker/` | 安全退役 Skill 与知识资料 | 是 |
+| `.kiro/hooks/bury-on-delete.json` | `PostFileDelete` 后登记墓碑 | 是 |
+| `.kiro/hooks/settle-after-task.json` | `PostTaskExec` 后运行健康测试并裁决 | 是 |
+| `scripts/undertaker.mjs` | `assess / bury / settle` 编排 | 不必逐行讲 |
+| `scripts/cemetery.mjs` | v2 数据校验、风险与状态领域逻辑 | 不必逐行讲 |
+| `demo-src/legacy-ghost.mjs` | 唯一获准删除的受控目标 | 是 |
+| `demo-src/active-consumer.mjs` | 存活依赖与后续最小修复目标 | 是 |
+| `data/cemetery.json` | assessment 与墓碑的元数据-only 数据源 | 结尾展示 |
+| `index.html / app.js / styles.css` | Evidence Console 和墓园 | 是 |
 | `tests/project-health.test.mjs` | 决定诈尸或安息的健康测试 | 可展示断言 |
-| `tests/fixtures/demo-src/` | 集成测试自带的稳定夹具，保证真实删除后全量测试仍可运行 | 不必展示 |
-| `docs/KIRO-DEMO-GUIDE.md` | 完整现场操作和排障指南 | 接手 AI 必读 |
-| `docs/VIDEO-SCRIPT.md` | 4 分钟逐镜头台词 | 正式录制照读 |
+| `docs/KIRO-DEMO-GUIDE.md` | 实际操作、排错和回退 | 接手 AI 必读 |
+| `docs/VIDEO-SCRIPT.md` | 3–5 分钟逐镜头脚本 | 正式录制照读 |
 
-## 7. 状态机与导演台
-
-墓碑只有三个业务状态：
-
-| 状态 | 技术含义 | 页面表现 | 下一步 |
-|---|---|---|---|
-| `pending` | Kiro 删除已被登记，尚未附加测试结论 | 等待 Hook 验证 | 不操作，等待测试 |
-| `resurrected` | 健康测试失败，仍有残留依赖 | 红色幽灵、“测试失败 · 已诈尸” | 记录证据，再让 Kiro 修复 |
-| `resting` | 健康测试通过 | 白花、“测试通过 · 已安息” | 演示完成 |
-
-显示模式与业务状态是两件事：
-
-- `replay`：仓库自带或公开构建的回放数据，不是现场证据；
-- `live`：本地 Undertaker 的 `bury` 命令写入的数据模式，但单凭此标签不能证明命令来自 Kiro Hook；
-- “播放本地回放”：仅在浏览器中演示动画，不写数据，也不能作为参赛证据。
-
-手工执行 `npm run funeral:bury` 也可能生成 `live` 数据。正式证据必须在连续录屏中同时出现 Kiro Agent 删除、Hook 执行和页面变化。
-
-导演台会根据模式和状态自动改变：
-
-```text
-回放数据 → 复制真实删除指令
-live 且无墓碑 → 去 Kiro 删除演示模块
-pending → 等待测试，不显示按钮
-resurrected → 复制修复指令
-resting → 演示完成
-```
-
-## 8. 只读接管检查
+## 7. 只读接管检查
 
 在项目根目录运行：
 
@@ -179,21 +154,39 @@ npm test
 npm run validate
 ```
 
-预期结果：
+预期：
 
-- Node.js 为 20 或更高版本；
-- Git 状态为空，或只有用户明确知道的文档/环境改动；
-- `Test-Path` 返回 `True`；
-- 16 项测试通过；
-- `Project contracts are valid.`。
+- Node.js 20 或更高；
+- 分支为预期分支，Git 状态为空或只有用户明确知道的改动；
+- 目标文件存在且已被 Git 跟踪；
+- 全量测试通过；
+- 项目契约校验通过；
+- `data/cemetery.json` 仍为 `replay` 基线。
 
-项目没有第三方运行时依赖，通常**不需要**执行 `npm install`。如果任何基线检查失败，先报告具体错误，不要直接改测试或清理 Git 工作区。
+仓库的 `replay` 基线可以带一组用于预览版式的 high assessment 和诈尸墓碑；它只是示例，不代表本机已经运行过 Agent。正式的 `funeral:assess` 会开始新的 live 退役案并清除回放墓碑。
 
-`npm run build` 会删除并重建被 Git 忽略的 `dist/`，因此它属于发布产物生成，不属于只读接管检查。需要检查发布产物时再单独运行。
+此时不要运行 `funeral:assess`。`npm run build` 会删除并重建被忽略的 `dist/`，也不属于只读接管检查；需要生成发布产物时再运行。
 
-`enabled: true` 和 `npm run validate` 只能证明 Hook 配置文件的基本结构有效，不能证明当前 Kiro 版本已经识别或触发它们。非 Kiro 接手 AI 应将运行时状态标为“未验证”，由用户在 Kiro 面板确认。
+## 8. Kiro 实机检查
 
-## 9. 在家准备录制
+用 Kiro 打开包含 `.kiro` 的仓库根目录：
+
+1. 在 Agent Picker/Agent 下拉框确认出现 **Code Undertaker**；
+2. 选择它，而不是在聊天框输入 `/code-undertaker`；
+3. 确认 Feature Spec、Skill、Steering 和两个独立 Hooks 可见；
+4. 查看 Agent 资源是否加载；
+5. 对 Knowledge Base 只报告当前机器的真实状态。
+
+重要边界：
+
+- `.kiro/agents/code-undertaker.md` 存在，只证明配置进入了仓库；
+- `npm run validate` 通过，只证明本地契约通过；
+- 页面出现 `agentId: code-undertaker`，只证明数据字段存在；
+- **只有真实 Kiro 中选中 Agent、执行动作并触发 Hooks 的连续录屏，才是比赛证据。**
+
+Knowledge Base 的本机 IDE 搜索能力可能随 Kiro 版本而异。未实际搜索成功时，必须写“尚未实机验证”，不能说“已加载并使用”。
+
+## 9. 在家准备正式录制
 
 推荐使用全新克隆作为一次性录制副本：
 
@@ -205,90 +198,93 @@ npm run validate
 npm run dev
 ```
 
-终端应显示：
-
-```text
-Code Funeral Hall: http://127.0.0.1:4173
-```
-
 然后：
 
-1. 浏览器打开 <http://127.0.0.1:4173>，不要直接双击 `index.html`；
-2. Kiro 选择 **File → Open Folder**，打开同一个项目根目录；
-3. 确认 Kiro 能看到 Feature Spec、`code-undertaker` Skill 和两个启用的 Hooks；
-4. 建议录制 1920×1080，浏览器缩放 110%–125%；
-5. 正式录制时打开 `docs/VIDEO-SCRIPT.md`，按时间表照读；
-6. 保持本地服务终端运行，页面会每 2 秒读取一次墓园数据。
+1. 浏览器打开终端显示的本地 HTTP 地址；不要直接双击 HTML；
+2. Kiro 打开同一个根目录；
+3. 选择 Code Undertaker；
+4. 屏幕同时准备好 Kiro、浏览器和本地服务终端；
+5. 保留初始 `replay` 示例画面，把真实 assessment 放到正式录制中执行；
+6. 使用 1920×1080，并确认 Evidence Console、风险和墓碑状态可读。
 
-如果 4173 端口被占用，可以在 PowerShell 临时使用另一个端口：
+若默认端口被占用：
 
 ```powershell
 $env:PORT = 4174
 npm run dev
 ```
 
-页面地址随之改为 `http://127.0.0.1:4174`。
+## 10. 正式录制第一阶段：Agent 尸检
 
-## 10. 正式录制：第一阶段只删除
-
-先在视频中快速展示 Spec、Skill 和两个 Hooks。随后使用页面按钮复制指令，或把下面的文字粘贴到 Kiro：
+先在镜头中选择 Code Undertaker，然后对它说：
 
 ```text
-/code-undertaker 请使用 #spec:code-funeral-hall 执行任务 6.1。先检查调用者和 Git 状态，只删除 demo-src/legacy-ghost.mjs；不要修改 active-consumer.mjs，也不要提前修复测试。
+请读取当前 Feature Spec、Steering 和 code-undertaker Skill。现在只做退役前尸检，不删除也不修改源码。请调用：
+npm run funeral:assess -- demo-src/legacy-ghost.mjs
+根据工具返回的受控事实说明风险，并在任何删除前停下来请求我批准精确目标。
 ```
 
-在批准操作前必须核对：
+必须拍到：
 
-- 删除目标只有 `demo-src/legacy-ghost.mjs`；
-- Kiro 已检查调用者和 Git 状态；
-- 本任务没有修改 `active-consumer.mjs`；
-- 删除来自 Kiro Agent，不是资源管理器、编辑器或终端手工删除。
+- Agent Picker 中选中的 Code Undertaker；
+- assessment 命令确实由该会话调用；
+- Evidence Console 显示 Git、基线、依赖数 `1` 和 `high`；
+- Agent 明确等待用户批准；
+- 目标文件此时仍存在。
 
-预期自动链路：
+这一步后页面进入 `live`，但还没有墓碑，因此标签应是“**Kiro Agent · 现场评估**”；删除立碑后才变为“**Kiro Hook · 实时**”。任何 `live` 标签单独都不证明 Kiro，证据来自同一镜头中的 Agent 调用和 Hook 输出。
 
-1. `PostFileDelete` 调用 `node scripts/undertaker.mjs bury`；
-2. 受限 Git diff 确认删除事实；
-3. `data/cemetery.json` 切换为 `live` 并写入元数据-only 墓碑；
-4. `PostTaskExec` 调用 `node scripts/undertaker.mjs settle`；
+## 11. 第二阶段：从 Feature Spec 运行任务 7.2，让它诈尸
+
+确认 assessment 为 `high` 后，先对同一个 Agent 明确授权：
+
+```text
+我批准退役的精确目标仅为 demo-src/legacy-ghost.mjs。不要通过普通聊天直接删除；接下来只允许由 code-funeral-hall Feature Spec 的任务 7.2 执行。本任务只删除旧模块，不要修改 demo-src/active-consumer.mjs，不要提前修复测试，也不要直接修改 data/cemetery.json。
+```
+
+随后打开 Kiro 的 `code-funeral-hall` Feature Spec，在任务列表中**点击/运行任务 7.2**。聊天授权不能代替这个操作；视频必须拍到任务 7.2 被启动，才能把后续 `PostTaskExec` 与这次删除关联起来。
+
+任务 7.2 执行时，burial 允许的唯一 Spec 元数据文件变化是 `.kiro/specs/code-funeral-hall/tasks.md` 中由真实执行产生的任务状态。不得修改 `requirements.md`、`design.md` 或其他任务内容，也不得手工勾选任务伪造完成。
+
+授权前核对：
+
+- 唯一删除目标正确；
+- Agent 已看到一个存活依赖；
+- 用户做出了明确批准；
+- Kiro 界面显示正在执行 `code-funeral-hall` 任务 7.2，而不是普通聊天自由删除；
+- 当前任务不会顺便修复消费者；
+- Spec 侧只有真实任务状态文件允许变化。
+
+预期链路：
+
+1. Kiro 从 Feature Spec 启动任务 7.2，Agent 只删除目标；
+2. `PostFileDelete` 调用 `bury`，assessment 与墓碑使用同一个稳定 ID；
+3. 墓碑进入 `pending`；
+4. Spec 任务完成后，`PostTaskExec` 调用 `settle`；
 5. 健康测试因旧 import 失败；
-6. 墓碑进入 `resurrected`。
+6. 同一墓碑进入 `resurrected`，页面显示红色幽灵。
 
-`pending` 可能因为两个 Hook 紧接执行而只出现很短时间。视频不必强求拍到中间帧，但必须拍到：
+必须让“测试失败 · 已诈尸”停留几秒。不要立即掩盖失败，它正是 Agent 下一步诊断的真实输入。
 
-- 右上角“Kiro Hook · 实时”；
-- `legacy-ghost.mjs` 文件名；
-- “测试失败 · 已诈尸”；
-- 失败测试摘要和红色幽灵。
+## 12. 第三阶段：同一 Agent 最小修复
 
-## 11. 正式录制：第二阶段修复
-
-先让诈尸画面停留几秒，再把下面的文字交给 Kiro：
+继续使用已经选中的 Code Undertaker：
 
 ```text
-删除 demo-src/legacy-ghost.mjs 后，demo-src/active-consumer.mjs 仍导入该模块，导致项目健康测试失败。预期 memorialMessage('旧接口') 仍返回 '旧接口 已归档'。不得恢复 legacy-ghost.mjs，不得改变该公开行为，也不得修改墓园 JSON 来伪造通过。请生成并执行最小 Bugfix Spec。
+刚才的退役导致健康测试失败。请基于真实失败创建并执行最小 Bugfix Spec：不得恢复 demo-src/legacy-ghost.mjs；不得改变 memorialMessage('旧接口') 返回 '旧接口 已归档' 的公开行为；不得修改健康测试或墓园 JSON 伪造通过。只修复仍依赖旧模块的消费者，并让 PostTaskExec 重新裁决。
 ```
 
-接手 AI 必须检查 Bugfix 是否满足：
+接手 AI 必须检查：
 
-- 没有恢复 `legacy-ghost.mjs`；
-- 业务代码只对消费者做最小修改；新增 Bugfix Spec 文件和 Hook 更新墓园 JSON 属于预期变化；
-- 没有修改健康测试来降低标准；
-- 没有直接修改墓园状态伪造通过；
-- `memorialMessage('旧接口')` 仍返回 `旧接口 已归档`；
-- Bugfix 任务结束后由 `PostTaskExec` 再次运行裁定；
-- 同一块墓碑转为 `resting`，没有生成第二块重复墓碑。
+- 没有恢复旧文件；
+- 业务代码只做行为保持的最小修复；
+- 没有降低或删除测试；
+- 没有直接写 `resting`；
+- Bugfix Spec 清楚写出当前行为、预期行为和保持不变行为；
+- Hook 重新运行健康测试；
+- 同一墓碑变为 `resting`，没有创建重复墓碑。
 
-最终画面必须拍到：
-
-- “测试通过 · 已安息”；
-- 白花；
-- 同一个文件和同一块墓碑；
-- 测试耗时；
-- `legacy-ghost.mjs` 仍然不存在。
-
-## 12. 录制结束后的验证
-
-在不打断录屏叙事的位置运行：
+## 13. 录制结束后的验证
 
 ```powershell
 npm test
@@ -298,133 +294,126 @@ git status --short
 git diff --stat
 ```
 
-其中 `npm run build` 会重建 `dist/` 并把发布快照强制设为 `replay`；`dist/` 已被 Git 忽略，不会覆盖现场墓园源数据。
+`npm run build` 会生成公开 `dist/`，并强制发布数据为 `replay`；它不应把线上静态页伪装成 Kiro 实时现场。
 
-还要检查 `data/cemetery.json` 只包含：
+检查 `data/cemetery.json` 不包含：
 
-- 稳定 ID；
-- 仓库相对路径和文件名；
-- 行数、Git 年龄、提交次数；
-- 删除和更新时间；
-- 固定死因；
-- 状态；
-- 测试是否通过、失败数和耗时。
+- 源码或自由文本推理；
+- 依赖文件路径清单；
+- Hook 原始输入或完整命令输出；
+- `C:\Users\...` 等用户绝对路径；
+- Token、Cookie、邮箱、环境变量或凭据。
 
-出现以下任意内容应停止发布：源码片段、Hook 原始输入、`C:\Users\...` 绝对路径、Token、Cookie、邮箱、环境变量或 Git 凭据。
+## 14. 页面阶段与下一步动作
 
-## 13. 常见故障与正确处理
+| 数据状态 | 页面含义 | 下一步 |
+|---|---|---|
+| 无 assessment | 等待 Agent 尸检 | 选择 Agent 并运行 assess |
+| assessment，无墓碑 | 风险已评估，等待批准 | 用户核对后批准精确目标 |
+| `pending` | 删除已登记，等待 Hook 裁决 | 不要手工改数据 |
+| `resurrected` | 测试失败，代码诈尸 | 同一 Agent 创建 Bugfix Spec |
+| `resting` | 修复通过，安全安息 | 运行最终验收并收尾 |
 
-### 页面没有打开
+网页是 Agent Evidence Console + 墓园结果层，不是独立聊天机器人。
 
-- 必须先运行 `npm run dev`；
-- 使用终端输出的 HTTP 地址；
-- 不要直接双击 HTML；
-- 检查端口是否被其他进程占用。
+## 15. 故障、回退和重录
 
-### 页面一直显示“回放数据 · 非实时”
+### Agent Picker 看不到 Code Undertaker
 
-依次确认：
+- 确认 Kiro 打开的是仓库根目录；
+- 确认 `.kiro/agents/code-undertaker.md` 存在；
+- 重载工作区并查看 Kiro 的配置错误；
+- 若仍不可见，停止正式录制，记录当前 Kiro 版本并排查；
+- 不要改用 `/code-undertaker` 后声称它是 Custom Agent。
 
-1. 删除确实由 Kiro Agent 完成；
-2. Kiro 打开的是包含 `.kiro` 的仓库根目录；
-3. `bury-on-delete.json` 已启用且无配置错误；
-4. 删除路径确实是 `demo-src/legacy-ghost.mjs`；
-5. 文件删除前已被 Git 跟踪；
-6. `data/cemetery.json` 是否被 Hook 更新。
+### Knowledge Base 没有搜索结果
 
-不要为了让页面变绿而手改 JSON。
+先确认当前 Kiro 版本是否支持对应资源。可以让 Agent 直接读取 Skill/reference 文件继续排障，但视频和说明必须如实写“Knowledge Base 未完成实机验证”，不能伪造语义检索成功。
 
-### `PostFileDelete` 在当前 Kiro 版本中没有触发
+### assessment 不是 high
 
-完成上述检查后，唯一允许的兼容降级是：
+- `blocked`：按输出检查 Git 跟踪、无关工作区改动和基线测试；不要绕过；
+- `low`：确认消费者是否仍导入目标；若演示基线已被改动，换一个干净克隆；
+- 不要手改 `dependentCount` 或 `risk`。
 
-- 临时把**现有** burial Hook 的触发器改成 `Stop`；
-- 删除该 Hook 的文件 matcher；
-- 命令仍保持 `node scripts/undertaker.mjs bury`；
-- 不新增第三个 Hook；
-- 视频和说明中明确称为 **Stop + Git diff fallback**；
-- 不得声称 `PostFileDelete` 已成功。
+### `PostFileDelete` 没触发
 
-### 第一次健康测试失败
+依次确认删除者、工作区根目录、Hook 启用状态、匹配路径和 Git 基线。最后才允许使用文档约定的 **Stop + Git diff fallback**，并在录像和提交说明中明确标注 fallback；不得声称 `PostFileDelete` 成功。
 
-这是预期剧情，不是需要立即掩盖的错误。先录下 `resurrected` 证据，再创建 Bugfix Spec。
+### 第一次任务被一次性修好
 
-### 第一次任务被 Kiro 一次性修好了
-
-不要伪造失败。最稳妥的做法是停止本次录制，使用新的干净克隆重来，并再次强调“只删除，不修改消费者”。
+不要制造假失败。停止本次录制，使用新克隆重来，并再次强调“只删除，不修改消费者”。
 
 ### 需要重录
 
-使用新的克隆或明确的 Git 工作树。不要在有未知改动的目录中运行宽泛恢复命令。接手 AI 应先列出具体变更并征得用户同意。
+最安全的方式是新克隆或新 Git 工作树。先列出要保留的变化；不要对含未知改动的目录运行 `git reset --hard` 或 `git clean`。
 
-## 14. 安全边界
+## 16. 安全和诚实边界
 
-- Undertaker 脚本本身不会主动删除或恢复源码；删除必须来自用户批准的 Kiro Spec 任务。
-- 只接受 `demo-src/` 下的 `.mjs` 仓库相对路径。
-- 拒绝绝对路径、`..` 路径逃逸和非删除状态。
-- Git 和 Node 子进程使用程序名加参数数组，不把不可信文本拼成 Shell 命令。
-- Hook 标准输入不被原样保存或显示。
-- JSON 使用临时文件后原子替换，避免半截数据。
-- 本项目不需要数据库、云服务、API Key 或付费接口。
-- 公开构建会强制把墓园数据标为 `replay`，避免把静态页面冒充实时 Hook。
+- 只有用户明确批准后才允许删除精确目标；
+- 当前目标严格限定为 `demo-src/legacy-ghost.mjs`；
+- 脚本拒绝绝对路径、路径逃逸和非批准目标；
+- 不保存源码、依赖路径清单或模型思维链；
+- 不需要数据库、云服务或外部 API Key；
+- 不宣称通用多语言依赖分析；
+- 不宣称生产环境无人值守自动删除；
+- 不把 `agentId`、页面动画或 `live` 标签当作 Kiro 证明；
+- 不把 Knowledge Base 配置存在写成“本机已经检索成功”；
+- 线上页面只能提供回放，真实证据来自 Kiro 连续录屏。
 
-## 15. 项目的诚实边界
+## 17. 比赛提交口径与 200 字说明
 
-不要把原型夸大成生产级代码治理平台：
+按本次线上赛页面口径：可提交可运行 Demo 或 3–5 分钟录屏，附 200 字内说明；评审为脑洞 35%、Kiro 使用深度 35%、交付完成度 30%。录屏要同时回答三件事：创意为什么好记、Kiro 为什么不可替代、作品是否真的跑通。
 
-- 当前只演示一个受控 `.mjs` 文件的删除；
-- 当前健康裁定只运行 `tests/project-health.test.mjs`；
-- JSON 是本地单文件状态，不支持多人并发；
-- Hook 是删除后的验证，不会阻止删除、自动回滚或自动修复；
-- 线上页面只能提供回放，真实 Kiro 证据来自本地连续录屏；
-- 项目当前价值是“可运行、可审计的 Kiro 原生演示原型”，不是通用商业产品。
+可直接提交的 200 字内中文说明：
 
-这不会削弱参赛价值。它的亮点是创意清晰、Kiro 使用深、因果链完整，而且每个状态都有真实测试证据。
+> 代码守灵堂是一名可在 Kiro Agent Picker 选择的代码退役 Agent。它先对源码做只读尸检，核对 Git、依赖与测试，等待批准后通过 Spec 任务 7.2 删除旧模块；Hooks 自动立碑并裁定，失败则“诈尸”，Agent 以 Bugfix Spec 最小修复，测试通过才“安息”。网页只展示可审计证据，不伪造 AI 结果。
 
-## 16. 4 分钟视频的最简导演顺序
+## 18. 3–5 分钟最简顺序
 
-详细台词见 `docs/VIDEO-SCRIPT.md`。接手 AI 只需守住这七段：
+1. 页面用 20 秒解释“删除不等于安全”；
+2. Kiro 选择 Code Undertaker，展示资源和两个 Hooks；
+3. Agent 调用 assess，证据台显示 1 个依赖与 `high`；
+4. Agent 请求批准，用户只批准目标文件；
+5. 在 `code-funeral-hall` Feature Spec 点击/运行任务 7.2，Hooks 使墓碑诈尸；
+6. 同一 Agent 创建 Bugfix Spec 并最小修复；
+7. Hook 重验，同一墓碑安息；
+8. 展示元数据-only JSON 和最终校验。
 
-1. **0:00–0:25**：网页讲问题——删除不等于安全；
-2. **0:25–0:55**：Kiro 展示 Spec、Skill、两个 Hooks；
-3. **0:55–1:30**：Kiro 只删除旧模块；
-4. **1:30–2:10**：网页展示实时模式、测试失败和诈尸；
-5. **2:10–3:05**：Kiro 展示 Bugfix Spec 的三项约束和最小修改；
-6. **3:05–3:40**：网页展示测试通过和安息；
-7. **3:40–4:05**：展示元数据-only JSON 并回到网页收尾。
+详细台词见 `docs/VIDEO-SCRIPT.md`。
 
-Kiro 思考和命令等待可以剪短，但不能剪断：
+## 19. 完成标准
 
-```text
-删除 → Hook → 测试失败 → Bugfix → 测试通过
-```
+只有同时满足以下条件，接手 AI 才能说“可以提交”：
 
-## 17. 完成标准
+- Kiro Agent Picker 真实选中了 Code Undertaker；
+- assessment 由该 Agent 会话调用并产生 `high`；
+- Agent 在删除前等待并获得用户对精确目标的批准；
+- 视频拍到用户在 `code-funeral-hall` Feature Spec 点击/运行任务 7.2，而非普通聊天直接删除；
+- 任务 7.2 只删除唯一目标，Spec 侧只产生真实的 `tasks.md` 状态变化；
+- 两个 Hooks 的真实执行在连续录屏中可见；
+- 视频拍到同一退役案从 `high` 到 `resurrected` 再到 `resting`；
+- 同一 Agent 创建并执行最小 Bugfix Spec，未恢复旧文件；
+- 最终测试、validate 和 build 通过；
+- 公开数据没有源码、思维链、绝对路径或凭据；
+- 线上静态页明确标记为 replay；
+- 视频控制在 3–5 分钟；
+- Knowledge Base 和 fallback 的描述与本机真实情况一致。
 
-只有同时满足下列条件，接手 AI 才能告诉用户“可以提交”：
-
-- Kiro Agent 真实删除了唯一目标文件；
-- 视频拍到 Feature Spec、Skill 和两个 Hooks；
-- 页面明确进入“Kiro Hook · 实时”；
-- 视频拍到同一次删除导致的测试失败和 `resurrected`；
-- Kiro 通过 Bugfix Spec 修复消费者，未恢复旧模块；
-- 同一块墓碑最终进入 `resting`；
-- `npm test`、`npm run validate`、`npm run build` 通过；
-- 公开数据不包含源码、凭据或用户绝对路径；
-- 线上静态页面仍明确标注为回放；
-- 视频时长控制在 3–5 分钟，因果关系看得懂。
-
-## 18. 接手 AI 的最后汇报模板
+## 20. 接手 AI 最后汇报模板
 
 ```text
-当前阶段：准备 / 已删除待裁定 / 已诈尸待修复 / 已安息 / 被阻塞
+当前阶段：准备 / 已尸检待批准 / 已删除待裁决 / 已诈尸待修复 / 已安息 / 被阻塞
 Git 状态：
-Kiro 证据：Spec [有/无]，Skill [有/无]，PostFileDelete [成功/未验证/使用 fallback]，PostTaskExec [成功/未验证]
-页面模式：回放 / 实时
-当前墓碑状态：无 / pending / resurrected / resting
-自动验证：npm test [结果]，validate [结果]，build [结果]
+Kiro Agent Picker：Code Undertaker [已选中 / 未识别 / 未验证]
+Knowledge Base：[实机可搜索 / 未实机验证 / 不可用，使用直接文件读取]
+assessment：tracked [ ]，workspaceClean [ ]，baselinePassed [ ]，dependentCount [ ]，risk [ ]
+Hooks：PostFileDelete [成功 / 未验证 / fallback]，PostTaskExec [成功 / 未验证]
+页面模式：replay / live
+墓碑状态：无 / pending / resurrected / resting
+自动验证：test [ ]，validate [ ]，build [ ]
 下一步唯一动作：
-风险或需要用户确认的事项：
+风险或需用户确认：
 ```
 
-接手 AI 应以事实填写，不要用页面动画代替 Hook 证据，也不要把未执行的步骤写成已完成。
+只填可证明的事实；不要把“配置写好了”填写成“运行时验证成功”。

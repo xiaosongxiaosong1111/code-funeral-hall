@@ -3,7 +3,12 @@ import path from 'node:path';
 
 const DEMO_PREFIX = 'demo-src/';
 const DEMO_FILE = /^[A-Za-z0-9._/-]+\.mjs$/;
-const CEMETERY_FIELDS = new Set(['version', 'mode', 'activeId', 'updatedAt', 'graves']);
+export const APPROVED_TARGET = 'demo-src/legacy-ghost.mjs';
+const AGENT_ID = 'code-undertaker';
+const CEMETERY_FIELDS = new Set(['version', 'mode', 'activeId', 'updatedAt', 'assessment', 'graves']);
+const ASSESSMENT_FIELDS = new Set([
+  'id', 'agentId', 'targetPath', 'assessedAt', 'tracked', 'workspaceClean', 'baselinePassed', 'dependentCount', 'risk',
+]);
 const GRAVE_FIELDS = new Set([
   'id', 'filePath', 'fileName', 'deletedAt', 'ageDays', 'commitCount', 'lineCount', 'state', 'cause', 'test',
 ]);
@@ -69,16 +74,42 @@ function isNonNegativeInteger(value) {
 }
 
 function isIsoTimestamp(value) {
-  return typeof value === 'string' && Number.isFinite(Date.parse(value));
+  if (typeof value !== 'string' || !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/.test(value)) return false;
+  const time = Date.parse(value);
+  return Number.isFinite(time) && new Date(time).toISOString() === value;
+}
+
+function recordId(revision, filePath) {
+  return createHash('sha256').update(`${revision}:${filePath}`).digest('hex').slice(0, 16);
+}
+
+function assessmentRisk({ tracked, workspaceClean, baselinePassed, dependentCount }) {
+  if (!tracked || !workspaceClean || !baselinePassed) return 'blocked';
+  return dependentCount > 0 ? 'high' : 'low';
+}
+
+function validateAssessment(assessment) {
+  assertFields(assessment, ASSESSMENT_FIELDS, 'Assessment');
+  if (!/^[a-z0-9-]{1,64}$/.test(assessment.id) || !isIsoTimestamp(assessment.assessedAt)) {
+    throw new Error('Invalid assessment identity.');
+  }
+  if (assessment.agentId !== AGENT_ID) throw new Error('Invalid assessment agent.');
+  if (assessment.targetPath !== APPROVED_TARGET) throw new Error('Invalid approved assessment target.');
+  if (![assessment.tracked, assessment.workspaceClean, assessment.baselinePassed].every((value) => typeof value === 'boolean')) {
+    throw new Error('Invalid assessment facts.');
+  }
+  if (!isNonNegativeInteger(assessment.dependentCount)) throw new Error('Invalid assessment dependent count.');
+  if (assessment.risk !== assessmentRisk(assessment)) throw new Error('Assessment risk does not match repository facts.');
 }
 
 export function validateCemeteryDocument(document) {
   assertFields(document, CEMETERY_FIELDS, 'Cemetery');
-  if (document.version !== 1 || !['live', 'replay'].includes(document.mode) || !Array.isArray(document.graves)) {
+  if (document.version !== 2 || !['live', 'replay'].includes(document.mode) || !Array.isArray(document.graves)) {
     throw new Error('Unsupported cemetery.json schema.');
   }
   if (document.updatedAt !== null && !isIsoTimestamp(document.updatedAt)) throw new Error('Invalid cemetery update time.');
   if (document.activeId !== null && typeof document.activeId !== 'string') throw new Error('Invalid active grave ID.');
+  if (document.assessment !== null) validateAssessment(document.assessment);
 
   for (const grave of document.graves) {
     assertFields(grave, GRAVE_FIELDS, 'Grave');
@@ -111,6 +142,46 @@ export function createReplaySnapshot(document) {
   return { ...document, mode: 'replay' };
 }
 
+export function createAssessment({
+  targetPath,
+  revision = 'unknown',
+  assessedAt = new Date().toISOString(),
+  tracked,
+  workspaceClean,
+  baselinePassed,
+  dependentCount,
+}) {
+  const safePath = normalizeDemoPath(targetPath);
+  if (safePath !== APPROVED_TARGET) throw new Error(`Refusing unapproved target: ${safePath}`);
+  const assessment = {
+    id: recordId(revision, safePath),
+    agentId: AGENT_ID,
+    targetPath: safePath,
+    assessedAt,
+    tracked,
+    workspaceClean,
+    baselinePassed,
+    dependentCount,
+    risk: assessmentRisk({ tracked, workspaceClean, baselinePassed, dependentCount }),
+  };
+  validateAssessment(assessment);
+  return assessment;
+}
+
+export function recordAssessment(document, assessment) {
+  validateCemeteryDocument(document);
+  validateAssessment(assessment);
+
+  return {
+    ...document,
+    mode: 'live',
+    activeId: document.mode === 'replay' ? null : document.activeId,
+    updatedAt: assessment.assessedAt,
+    assessment,
+    graves: document.mode === 'replay' ? [] : document.graves,
+  };
+}
+
 export function createGrave({
   filePath,
   source,
@@ -125,7 +196,7 @@ export function createGrave({
   const ageDays = Number.isFinite(firstTime) && Number.isFinite(deletedTime)
     ? Math.max(0, Math.floor((deletedTime - firstTime) / 86_400_000))
     : 0;
-  const id = createHash('sha256').update(`${revision}:${safePath}`).digest('hex').slice(0, 16);
+  const id = recordId(revision, safePath);
 
   return {
     id,
@@ -143,13 +214,15 @@ export function createGrave({
 
 export function upsertGraves(document, incomingGraves, now = new Date().toISOString()) {
   if (!Array.isArray(incomingGraves) || incomingGraves.length === 0) return document;
+  if (document.mode === 'live'
+    && incomingGraves.every((grave) => document.graves.some(({ id }) => id === grave.id))) {
+    return document;
+  }
 
   const existingGraves = document.mode === 'replay' ? [] : document.graves;
   const additions = incomingGraves.map((grave) => {
     const existing = existingGraves.find(({ id }) => id === grave.id);
-    return existing
-      ? { ...grave, state: existing.state, test: existing.test }
-      : { ...grave };
+    return existing ? { ...existing } : { ...grave };
   });
   const incomingIds = new Set(additions.map(({ id }) => id));
   const graves = [
@@ -162,6 +235,7 @@ export function upsertGraves(document, incomingGraves, now = new Date().toISOStr
     mode: 'live',
     activeId: additions[0].id,
     updatedAt: now,
+    assessment: document.mode === 'replay' ? null : document.assessment,
     graves,
   };
 }
@@ -186,5 +260,5 @@ export function settleActiveGrave(document, result, now = new Date().toISOString
 }
 
 export function emptyCemetery() {
-  return { version: 1, mode: 'live', activeId: null, updatedAt: null, graves: [] };
+  return { version: 2, mode: 'live', activeId: null, updatedAt: null, assessment: null, graves: [] };
 }

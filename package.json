@@ -11,6 +11,7 @@
     "build": "node scripts/build.mjs",
     "dev": "node scripts/serve.mjs",
     "validate": "node scripts/validate-project.mjs",
+    "funeral:assess": "node scripts/undertaker.mjs assess",
     "funeral:bury": "node scripts/undertaker.mjs bury",
     "funeral:settle": "node scripts/undertaker.mjs settle"
   },

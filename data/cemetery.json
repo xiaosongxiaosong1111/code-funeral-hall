@@ -1,8 +1,19 @@
 {
-  "version": 1,
+  "version": 2,
   "mode": "replay",
   "activeId": "demo-legacy-ghost",
   "updatedAt": "2026-10-12T02:00:00.000Z",
+  "assessment": {
+    "id": "demo-legacy-ghost",
+    "agentId": "code-undertaker",
+    "targetPath": "demo-src/legacy-ghost.mjs",
+    "assessedAt": "2026-10-12T01:59:50.000Z",
+    "tracked": true,
+    "workspaceClean": true,
+    "baselinePassed": true,
+    "dependentCount": 1,
+    "risk": "high"
+  },
   "graves": [
     {
       "id": "demo-legacy-ghost",

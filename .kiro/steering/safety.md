@@ -6,7 +6,14 @@ inclusion: always
 
 ## 元数据规则
 
-墓园数据只允许包含稳定 ID、仓库相对路径、文件名、行数、Git 年龄、提交次数、删除时间、程序内置死因、状态和测试摘要。不得持久化或渲染：
+`data/cemetery.json` 使用严格的 v2 白名单，不允许任何额外字段：
+
+- 顶层字段仅限：`version`、`mode`、`activeId`、`updatedAt`、`assessment`、`graves`。
+- `assessment` 可以为 `null`；否则字段仅限：`id`、`agentId`、`targetPath`、`assessedAt`、`tracked`、`workspaceClean`、`baselinePassed`、`dependentCount`、`risk`。
+- 每条墓碑字段仅限：`id`、`filePath`、`fileName`、`deletedAt`、`ageDays`、`commitCount`、`lineCount`、`state`、`cause`、`test`。
+- `test` 可以为 `null`；否则字段仅限：`passed`、`failed`、`durationMs`。
+
+`assessment` 只保存固定 Agent/目标、布尔事实、依赖数量和派生风险，不保存依赖路径、命令输出、授权文本或自由推理。墓园数据不得持久化或渲染：
 
 - 源码或源码片段；
 - Hook 原始标准输入；
